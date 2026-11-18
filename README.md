@@ -83,9 +83,9 @@ npm run build
 发布通道只接收单文件自包含 HTML，而原工程是多文件 Vite 产物，因此增加两个文件完成内联：
 
 - `vite.single.config.js`：`inlineDynamicImports: true`、`cssCodeSplit: false`、`base: "./"`，把 Three.js 与业务代码合成单一 bundle
-- `build-single.mjs`：把 `dist-single/` 的 `index.html` + `app.css` + `app.js` 合并成一个 HTML，剥离 icon link、转义 `</script`
+- `build-single.mjs`：把 `dist-single/` 的 `index.html` + `app.css` + `app.js` 合并成一个 HTML，剥离 icon link、转义 `</script`；同时把 `assets/` 下的图片转成 data URI 内联——图片路径由 JS 在运行时注入，发布链路抓不到运行时生成的地址，只有内联才能随单文件一起上线
 
-产物 `nuomi-island-standalone.html`（623,504 字节），外部引用数 0，用 `file://` 直接打开即可完整运行（WebGL 场景、内容面板、外链均正常，控制台干净）。随后发布：
+产物 `nuomi-island-standalone.html`（2.50 MB，含 8 张内联图），外部引用数 0，用 `file://` 直接打开即可完整运行（WebGL 场景、图片、内容面板、外链均正常，控制台干净）。随后发布：
 
 ```bash
 lark-cli apps +deploy --file-path ./nuomi-island-standalone.html
@@ -233,7 +233,8 @@ nuomi-island/
 ├── nuomi-island-standalone.html   单文件发布产物（623 KB）
 ├── package.json
 ├── public/
-│   └── favicon.svg
+│   ├── favicon.svg
+│   └── assets/            8 张项目配图（robot-1..4、pepper-1、fm-1..3）
 ├── src/
 │   ├── portfolio.json         唯一的个人内容入口
 │   ├── schema.js              3/4 模块校验、转义、链接协议
@@ -272,8 +273,7 @@ lark-cli apps +deploy --file-path ./nuomi-island-standalone.html --app-id app_17
 ## 七、说明与边界
 
 - **数据来源**：全部条目来自本人提供的简历截图与口头补充，未使用模板示例或他人经历；团队项目在 `sourceNote` 中标注个人与团队的边界。
-- **暂无配图**：当前四个模块均为文字条目，作品截图、PCB 图、证书尚未放入；补齐时按 `/assets/module-N-item-M.ext` 命名放进 `public/assets/`。
-- **手机适配**：模板含 ≤700px 断点，桌面 718 宽窗口已验证无横向溢出，手机真机尚未逐屏检查。
+- **配图**：项目与实习经历已配 8 张实拍与设计图——桌面机器人 4 张（整机、焊好的主板、原理图、PCB 布线）、指天椒 1 张（核心检测脚本片段，由源码渲染）、FM 收音机 3 张（整机、PCB 正反面）。图片在面板底部以缩略卡呈现，点开可看原图。技能、荣誉、学生工作仍为纯文字，证书与演示视频可再补。- **手机适配**：模板含 ≤700px 断点，桌面 718 宽窗口已验证无横向溢出，手机真机尚未逐屏检查。
 - **角色风格**：低多边形积木式建模，可表达发型结构、服装配色与层次，但无法还原参考图的针织纹理与写实光影。
 - **发布形态**：线上为单文件静态页，不含后端；页面内无任何统计脚本与自动外链行为。
 
